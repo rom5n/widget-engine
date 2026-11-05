@@ -27,10 +27,13 @@ liquid glass, solid and clear.
 
 ## Quick start (10 minutes)
 
+The step-by-step [guide](docs/guide.md) goes from an empty folder to a widget your app feeds
+and ships into [Calmdesk](https://github.com/rom5n/calmdesk).
+
 Needs Windows 11, Rust 1.85+ and the MSVC build tools.
 
 ```bash
-git clone <this repo> widget && cd widget
+git clone https://github.com/rom5n/widget-engine.git widget && cd widget
 cargo run -p widget-engine --example clock --release
 ```
 
@@ -100,6 +103,7 @@ we_run(engine);
 
 ## Docs
 
+- [docs/guide.md](docs/guide.md): step by step, from a new package to shipping it in Calmdesk.
 - [docs/authoring.md](docs/authoring.md): widget packages, layout elements, bindings, styling.
 - [docs/api.md](docs/api.md): Rust and C APIs.
 - [docs/rendering.md](docs/rendering.md): how the engine works inside, for contributors.
