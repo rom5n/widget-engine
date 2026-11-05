@@ -1,0 +1,16 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../schemas/layout.xsd">
+  <!-- Hands are full-box overlays that turn around the dial center. -->
+  <style class="hand" shadow="0 0 3 #00000059"/>
+  <row padding="24 24 24 26" gap="16" align="center">
+    <column grow="1" gap="2">
+      <text fit="true" value="{clock.time}" size="56" features="tnum"/>
+      <text value="{clock.date}" size="15" weight="400" color="secondary" if="opt.date"/>
+    </column>
+    <stack width="100" height="100" if="opt.dial">
+      <image src="assets/dial.svg"/>
+      <image class="hand" src="assets/hand-hour.svg" rotate="{clock.hour_angle}" spin="0.008333" if="opt.hands"/>
+      <image class="hand" src="assets/hand-minute.svg" rotate="{clock.minute_angle}" spin="0.1" if="opt.hands"/>
+      <image class="hand" src="assets/hand-second.svg" rotate="{clock.second_angle}" spin="6" if="opt.second"/>
+    </stack>
+  </row>
+</widget>

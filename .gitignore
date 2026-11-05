@@ -1,0 +1,6 @@
+/target
+*.obj
+*.exe
+examples/c-demo/widget.dll
+examples/c-demo/*.lib
+examples/c-demo/*.exp

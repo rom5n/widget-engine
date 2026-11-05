@@ -1,0 +1,21 @@
+#:schema ../../../schemas/widget.schema.json
+id = "dev.widget-engine.sparkline"
+name = "Sparkline"
+engine = "^0.1"
+size = [300, 150]
+
+[card]
+radius = 26
+background = "glass"
+shadow = true
+
+[font]
+weight = 600
+
+[customize]
+allow = ["size", "background", "theme", "font", "shape", "colors"]
+
+[[option]]
+key = "range"
+label = "Range"
+values = [["1h", "Last hour"], ["24h", "Last 24 hours"], ["7d", "Last 7 days"]]

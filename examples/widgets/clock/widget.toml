@@ -1,0 +1,123 @@
+#:schema ../../../schemas/widget.schema.json
+id = "dev.widget-engine.clock"
+name = "Clock"
+variant = "Wide"
+category = "Time"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+
+[font]
+family = "Nunito"
+weight = 600
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[[option]]
+key = "dial"
+label = "Dial"
+sizes = { off = [170, 170] }
+
+[[option]]
+key = "hands"
+label = "Hour and minute hands"
+
+[[option]]
+key = "second"
+label = "Second hand"
+
+[[option]]
+key = "date"
+label = "Date"
+
+[strings.ru]
+"Clock" = "Часы"
+"Wide" = "Широкий"
+"Dial" = "Циферблат"
+"Hour and minute hands" = "Часовая и минутная стрелки"
+"Second hand" = "Секундная стрелка"
+"Date" = "Дата"
+
+[strings.uk]
+"Clock" = "Годинник"
+"Wide" = "Широкий"
+"Dial" = "Циферблат"
+"Hour and minute hands" = "Годинна і хвилинна стрілки"
+"Second hand" = "Секундна стрілка"
+"Date" = "Дата"
+
+[strings.de]
+"Clock" = "Uhr"
+"Wide" = "Breit"
+"Dial" = "Zifferblatt"
+"Hour and minute hands" = "Stunden- und Minutenzeiger"
+"Second hand" = "Sekundenzeiger"
+"Date" = "Datum"
+
+[strings.fr]
+"Clock" = "Horloge"
+"Wide" = "Large"
+"Dial" = "Cadran"
+"Hour and minute hands" = "Aiguilles des heures et minutes"
+"Second hand" = "Trotteuse"
+"Date" = "Date"
+
+[strings.es]
+"Clock" = "Reloj"
+"Wide" = "Ancho"
+"Dial" = "Esfera"
+"Hour and minute hands" = "Agujas de horas y minutos"
+"Second hand" = "Segundero"
+"Date" = "Fecha"
+
+[strings.it]
+"Clock" = "Orologio"
+"Wide" = "Largo"
+"Dial" = "Quadrante"
+"Hour and minute hands" = "Lancette di ore e minuti"
+"Second hand" = "Lancetta dei secondi"
+"Date" = "Data"
+
+[strings.pt]
+"Clock" = "Relógio"
+"Wide" = "Largo"
+"Dial" = "Mostrador"
+"Hour and minute hands" = "Ponteiros de horas e minutos"
+"Second hand" = "Ponteiro dos segundos"
+"Date" = "Data"
+
+[strings.pl]
+"Clock" = "Zegar"
+"Wide" = "Szeroki"
+"Dial" = "Tarcza"
+"Hour and minute hands" = "Wskazówki godzin i minut"
+"Second hand" = "Wskazówka sekundowa"
+"Date" = "Data"
+
+[strings.zh]
+"Clock" = "时钟"
+"Wide" = "宽"
+"Dial" = "表盘"
+"Hour and minute hands" = "时针和分针"
+"Second hand" = "秒针"
+"Date" = "日期"
+
+[strings.ja]
+"Clock" = "時計"
+"Wide" = "ワイド"
+"Dial" = "文字盤"
+"Hour and minute hands" = "時針と分針"
+"Second hand" = "秒針"
+"Date" = "日付"
+
+[strings.ko]
+"Clock" = "시계"
+"Wide" = "와이드"
+"Dial" = "다이얼"
+"Hour and minute hands" = "시침과 분침"
+"Second hand" = "초침"
+"Date" = "날짜"

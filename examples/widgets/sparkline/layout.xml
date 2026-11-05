@@ -1,0 +1,23 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../schemas/layout.xsd">
+  <!-- A pill button: lifts on hover, sinks on press, springs back. -->
+  <style class="button" padding="6 14" radius="14" fill="#FFFFFF1F" hover.fill="#FFFFFF33"
+         scale="1" hover.scale="1.04" pressed.scale="0.94" transition="spring"/>
+  <column padding="18 20" gap="10">
+    <row align="center" gap="8">
+      <text value="Activity" size="17" grow="1"/>
+      <stack class="button" action="toggle:range">
+        <text value="{opt.range}" size="13" weight="500"/>
+      </stack>
+      <stack class="button" action="refresh">
+        <text value="Refresh" size="13" weight="500"/>
+      </stack>
+    </row>
+    <!-- Drawn by the app with Engine::on_paint("sparkline", "chart", ...). -->
+    <canvas id="chart" grow="1" opacity="0.95" hover.opacity="1" transition="150" shadow="0 0 8 accent"/>
+    <row gap="6">
+      <text value="Updated {clock.time}" size="12" weight="400" color="secondary" grow="1"/>
+      <!-- Set by the app: Engine::set / widget_engine::set("sparkline", "peak", ...). -->
+      <text value="Peak {app.peak}" size="12" weight="500" color="secondary"/>
+    </row>
+  </column>
+</widget>

@@ -1,0 +1,52 @@
+#:schema ../../../schemas/widget.schema.json
+id = "dev.widget-engine.calendar"
+name = "Calendar"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "solid"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 600
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Calendar" = "Календарь"
+
+[strings.uk]
+"Calendar" = "Календар"
+
+[strings.de]
+"Calendar" = "Kalender"
+
+[strings.fr]
+"Calendar" = "Calendrier"
+
+[strings.es]
+"Calendar" = "Calendario"
+
+[strings.it]
+"Calendar" = "Calendario"
+
+[strings.pt]
+"Calendar" = "Calendário"
+
+[strings.pl]
+"Calendar" = "Kalendarz"
+
+[strings.zh]
+"Calendar" = "日历"
+
+[strings.ja]
+"Calendar" = "カレンダー"
+
+[strings.ko]
+"Calendar" = "캘린더"

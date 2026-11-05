@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/widget-engine/widget-engine/schemas/widget.schema.json",
+  "title": "widget.toml",
+  "description": "Manifest of a widget package. Editors with TOML schema support (Even Better TOML / Taplo) pick it up from a `#:schema` comment on the first line.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "engine", "size"],
+  "properties": {
+    "id": { "type": "string", "description": "Reverse-domain id, e.g. com.example.weather." },
+    "name": { "type": "string" },
+    "category": { "type": "string", "description": "Gallery section, e.g. \"Time\". Translated through [strings.<lang>] like name." },
+    "variant": { "type": "string", "description": "Which variant of a widget this is, e.g. \"Small\", shown under its name in a gallery. Translated like name." },
+    "engine": { "type": "string", "pattern": "^\\^?\\d+\\.\\d+", "description": "Compatible engine versions, e.g. \"^0.1\"." },
+    "size": {
+      "type": "array",
+      "items": { "type": "number", "exclusiveMinimum": 0 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Width and height in DIPs."
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Background card drawn by the engine.",
+      "properties": {
+        "radius": { "type": "number", "minimum": 0, "default": 24 },
+        "background": { "enum": ["frosted", "glass", "solid", "clear"], "default": "frosted" },
+        "border": { "type": "boolean", "default": true, "description": "Hairline edge." },
+        "shadow": { "type": "boolean", "default": false, "description": "Soft drop shadow. The widget window grows by its size." }
+      }
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "family": { "type": "string", "default": "Nunito" },
+        "weight": { "type": "integer", "minimum": 1, "maximum": 999, "default": 400 },
+        "width": { "type": "integer", "minimum": 1, "maximum": 9, "default": 5, "description": "1 ultra-condensed, 5 normal, 9 ultra-expanded." }
+      }
+    },
+    "customize": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["size", "background", "theme", "font", "shape", "colors", "text"] },
+          "description": "What end users may change in the right-click menu."
+        }
+      }
+    },
+    "option": {
+      "type": "array",
+      "description": "Widget options in the right-click menu. Use them in layout.xml as {opt.<key>}.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "label"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+          "label": { "type": "string" },
+          "values": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 },
+            "minItems": 1,
+            "description": "[value, label] pairs. Missing: a Show/Hide toggle with values on/off. Values \"Group/name\" show in a Group submenu."
+          },
+          "default": { "type": "string" },
+          "kind": { "enum": ["image", "folder"], "description": "The user picks a file or folder; bound as its path." },
+          "sizes": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+            "description": "value = [width, height]: picking that value resizes the widget."
+          }
+        }
+      }
+    },
+    "strings": {
+      "type": "object",
+      "description": "Translations of the name, category, variant, option labels and {str.<key>} texts, by Windows display language: [strings.ru] \"Range\" = \"Диапазон\". The engine translates its own labels.",
+      "additionalProperties": { "type": "object", "additionalProperties": { "type": "string" } }
+    }
+  }
+}

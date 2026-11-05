@@ -1,0 +1,9 @@
+#:schema ../../schemas/widget.schema.json
+id = "com.example.host-demo"
+name = "Host Demo"
+category = "Examples"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
