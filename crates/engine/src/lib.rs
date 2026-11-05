@@ -356,7 +356,7 @@ impl Engine {
                 backdrops: Backdrops::default(),
                 on_action: self.on_action,
                 on_moved: self.on_moved,
-                fullscreen: false,
+                fullscreen: None,
                 hidden: false,
                 keep_alive: self.keep_alive,
             };
@@ -438,6 +438,16 @@ pub fn close(id: &str) {
 pub fn set_hidden(hidden: bool) {
     command(Command::Hide(hidden));
 }
+
+/// Fullscreen apps hide the widgets on their monitor (games, videos, presentations). On by default.
+pub fn set_fullscreen_hiding(on: bool) {
+    FULLSCREEN_HIDING.store(on, std::sync::atomic::Ordering::Relaxed);
+    if let Some(host) = HOST.with(|h| h.get()) {
+        let _ = unsafe { PostMessageW(Some(host), WM_APP_BAR, WPARAM(windows::Win32::UI::Shell::ABN_FULLSCREENAPP as usize), LPARAM(0)) };
+    }
+}
+
+static FULLSCREEN_HIDING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 
 /// Paint callback for a `<canvas>` of a widget opened with [`open`], like [`Engine::on_paint`].
 /// Call it right after `open`.
@@ -628,8 +638,8 @@ struct State {
     backdrops: Backdrops,
     on_action: Option<ActionFn>,
     on_moved: Option<MovedFn>,
-    /// A fullscreen app runs on the desktop's monitor: widgets are hidden.
-    fullscreen: bool,
+    /// The monitor (`HMONITOR` value) a fullscreen app runs on: its widgets are hidden.
+    fullscreen: Option<isize>,
     /// The app hid the desktop widgets with [`set_hidden`].
     hidden: bool,
     keep_alive: bool,
@@ -665,7 +675,7 @@ impl State {
         // Popups show once drawn, so they never flash empty.
         unsafe {
             match place {
-                Place::Desktop if self.hidden || self.fullscreen => {
+                Place::Desktop if !self.visible(hwnd) => {
                     let _ = ShowWindow(hwnd, SW_HIDE);
                 }
                 Place::Desktop => {}
@@ -754,14 +764,18 @@ impl State {
         }
     }
 
-    /// Desktop widgets are visible unless the app hid them or a fullscreen app runs.
+    /// Desktop widgets are visible unless the app hid them or a fullscreen app runs on their monitor.
     fn show_desktop(&mut self) {
-        let show = !self.hidden && !self.fullscreen;
         for slot in self.slots.iter().filter(|s| s.place == Place::Desktop) {
             if let Some(h) = slot.hwnd {
-                let _ = unsafe { ShowWindow(h, if show { SW_SHOWNA } else { SW_HIDE }) };
+                let _ = unsafe { ShowWindow(h, if self.visible(h) { SW_SHOWNA } else { SW_HIDE }) };
             }
         }
+    }
+
+    fn visible(&self, hwnd: HWND) -> bool {
+        use windows::Win32::Graphics::Gdi::{MONITOR_DEFAULTTONEAREST, MonitorFromWindow};
+        !self.hidden && self.fullscreen.is_none_or(|m| m != unsafe { MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST) }.0 as isize)
     }
 
     /// New composition target for the window, then a full rebuild.
@@ -1063,14 +1077,15 @@ impl State {
         }
     }
 
-    /// A fullscreen app (game, video, presentation) started or ended: hide or show the widgets.
-    fn set_fullscreen(&mut self, on: bool) {
-        if self.fullscreen == on {
+    /// A fullscreen app (game, video, presentation) started or ended on `monitor`: hide or show
+    /// the widgets there.
+    fn set_fullscreen(&mut self, monitor: Option<isize>) {
+        if self.fullscreen == monitor {
             return;
         }
-        self.fullscreen = on;
+        self.fullscreen = monitor;
         self.show_desktop();
-        if !on {
+        if monitor.is_none() {
             // Time moved on while hidden.
             self.event_all(Event::TimeChanged);
         }
@@ -1613,31 +1628,35 @@ fn watch_fullscreen(host: HWND, on: bool) {
     }
 }
 
-/// The window in front is a fullscreen app: it covers its whole monitor, taskbar included,
-/// and is not the desktop, the taskbar or one of ours (menus, dialogs).
-fn fullscreen_in_front() -> bool {
+/// The monitor of the window in front, if that is a fullscreen app: it covers its whole monitor,
+/// taskbar included, and is not the desktop, the taskbar or one of ours (menus, dialogs).
+fn fullscreen_in_front() -> Option<isize> {
+    if !FULLSCREEN_HIDING.load(std::sync::atomic::Ordering::Relaxed) {
+        return None;
+    }
     use windows::Win32::Graphics::Gdi::{GetMonitorInfoW, MONITOR_DEFAULTTONULL, MONITORINFO, MonitorFromWindow};
     unsafe {
         let w = GetForegroundWindow();
         if w.is_invalid() {
-            return false;
+            return None;
         }
         let mut pid = 0;
         GetWindowThreadProcessId(w, Some(&mut pid));
         if pid == windows::Win32::System::Threading::GetCurrentProcessId() {
-            return false;
+            return None;
         }
         let mut class = [0u16; 64];
         let n = GetClassNameW(w, &mut class) as usize;
         if is_shell(&String::from_utf16_lossy(&class[..n])) {
-            return false;
+            return None;
         }
         let mut info = MONITORINFO { cbSize: size_of::<MONITORINFO>() as u32, ..Default::default() };
         let mut r = RECT::default();
-        if !GetMonitorInfoW(MonitorFromWindow(w, MONITOR_DEFAULTTONULL), &mut info).as_bool() || GetWindowRect(w, &mut r).is_err() {
-            return false;
+        let monitor = MonitorFromWindow(w, MONITOR_DEFAULTTONULL);
+        if !GetMonitorInfoW(monitor, &mut info).as_bool() || GetWindowRect(w, &mut r).is_err() {
+            return None;
         }
-        covers(r, info.rcMonitor)
+        covers(r, info.rcMonitor).then_some(monitor.0 as isize)
     }
 }
 
