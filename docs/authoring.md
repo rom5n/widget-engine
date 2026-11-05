@@ -9,7 +9,8 @@ widgets/hello/
   assets/         images (SVG, PNG, JPG), referenced by relative path
 ```
 
-Preview it with live reload while you edit:
+Start one with `widget-dev new widgets/hello` (a clock to change), then preview it with
+live reload while you edit:
 
 ```bash
 cargo run -p widget-engine --bin widget-dev --release -- widgets/hello
@@ -122,6 +123,27 @@ package's clicks without setting one. Calmdesk sends clicks back to that window 
 `action␟<package id>␟<widget id>␟<action>`, and broadcasts the registered message
 `Calmdesk.HostStarted` when it starts (your window must be top-level to hear it). `<canvas>`
 callbacks do not cross processes: draw with elements and SVG images instead.
+
+Each message is answered with the receiver's protocol version (now 1; 0 means not
+delivered), and `host::host_version()` returns Calmdesk's. Later versions only add message
+kinds and fields at the end, so ignore kinds you do not know and fields past the ones you
+read. An incompatible change would get a new `dwData`.
+
+From C: `we_host_set(package, key, value)`, `we_host_on_action(package, f, user)` and
+`we_host_version()` in `widget.h` do the same, no engine needed.
+
+### Publishing a package
+
+1. Give it a unique reverse-domain `id` (`com.yourname.weather`); it keys users' saved
+   settings, so keep it across versions.
+2. Check it: `widget-dev <dir>` prints any error with file and line. Try light and dark
+   themes and a few sizes from the right-click menu.
+3. Ship it with your app's installer into one of the places above, or as a zip users unpack
+   into `%LOCALAPPDATA%\Widgets\<package>`. Calmdesk finds it the next time its gallery opens.
+4. Uninstall: remove the folder (and the registry value if you added one). Widgets of a
+   package that is gone disappear from the desktop at the next start.
+5. If your app feeds the widget, it does so only while it runs: give the layout sensible
+   text for empty `{app.*}` values.
 
 ## layout.xml
 
