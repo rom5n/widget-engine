@@ -49,6 +49,14 @@ int we_on_paint(WeEngine *engine, const char *widget, const char *canvas, WePain
 /* Reloads package widgets when their files change (development). */
 int we_hot_reload(WeEngine *engine);
 
+/* Feeding your package's widgets when Calmdesk shows them (another process).
+ * Any thread, no engine needed. Values are sent again when Calmdesk restarts. */
+int we_host_set(const char *package, const char *key, const char *value);
+/* f runs on a thread of the engine's own for each click in those widgets. */
+int we_host_on_action(const char *package, WeActionFn f, void *user);
+/* Protocol version of the running Calmdesk; 0 if none answered yet. */
+int we_host_version(void);
+
 /* Shows the widgets and runs the message loop until all widgets close.
  * Takes ownership of the engine. */
 int we_run(WeEngine *engine);

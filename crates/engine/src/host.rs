@@ -22,6 +22,11 @@
 //! the same way, and broadcasts the registered window message [`STARTED`] when it starts:
 //! send everything again then. A window that should hear it must be a top-level one (not
 //! message-only).
+//!
+//! Versions: a receiver answers each message with its protocol version, [`VERSION`] (0 means
+//! not delivered). Later versions only add: new message kinds and new fields at the end.
+//! Receivers ignore kinds they do not know and fields past the ones they read. An
+//! incompatible change would get a new [`MAGIC`].
 
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex, OnceLock, mpsc};
@@ -34,6 +39,8 @@ use windows::core::{HSTRING, w};
 
 /// `dwData` of every message: "CDK1".
 pub const MAGIC: usize = 0x4344_4B31;
+/// Protocol version this side speaks; the answer to each message.
+pub const VERSION: u32 = 1;
 /// Window class of Calmdesk's message window.
 pub const HOST_CLASS: &str = "Calmdesk.Tray";
 /// Registered window message Calmdesk broadcasts when it starts.
@@ -76,13 +83,27 @@ pub unsafe fn decode(lparam: LPARAM) -> Option<Vec<String>> {
     Some(std::str::from_utf8(bytes).ok()?.split(SEP).map(String::from).collect())
 }
 
-/// Sends `fields` to the window `to`, with `from` as the reply address. False: not delivered.
-pub fn send(to: HWND, from: HWND, fields: &[&str]) -> bool {
+/// Sends `fields` to the window `to`, with `from` as the reply address. Returns the receiver's
+/// protocol version; 0: not delivered.
+pub fn send(to: HWND, from: HWND, fields: &[&str]) -> u32 {
     let text = fields.join("\u{1f}");
     let cds = COPYDATASTRUCT { dwData: MAGIC, cbData: text.len() as u32, lpData: text.as_ptr() as *mut _ };
     let mut result = 0usize;
     let lparam = LPARAM(&cds as *const COPYDATASTRUCT as isize);
-    unsafe { SendMessageTimeoutW(to, WM_COPYDATA, WPARAM(from.0 as usize), lparam, SMTO_ABORTIFHUNG, 1000, Some(&mut result)) }.0 != 0
+    let ok = unsafe { SendMessageTimeoutW(to, WM_COPYDATA, WPARAM(from.0 as usize), lparam, SMTO_ABORTIFHUNG, 1000, Some(&mut result)) }.0 != 0;
+    if ok { result as u32 } else { 0 }
+}
+
+/// Protocol version of the running Calmdesk, from its last answer; 0: none heard yet.
+pub fn host_version() -> u32 {
+    HOST_VERSION.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+static HOST_VERSION: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// Sends to Calmdesk and remembers its version.
+fn to_host(h: HWND, fields: &[&str]) {
+    HOST_VERSION.store(send(h, window(), fields), std::sync::atomic::Ordering::Relaxed);
 }
 
 fn host() -> Option<HWND> {
@@ -118,9 +139,9 @@ extern "system" fn client_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPA
     unsafe {
         match msg {
             WM_COPYDATA => {
-                let Some(f) = decode(lparam).filter(|f| f.len() == 4 && f[0] == "action") else { return LRESULT(0) };
+                let Some(f) = decode(lparam).filter(|f| f.len() >= 4 && f[0] == "action") else { return LRESULT(0) };
                 let _ = PostMessageW(Some(hwnd), WM_ACTION, WPARAM(0), LPARAM(Box::into_raw(Box::new(f)) as isize));
-                LRESULT(1)
+                LRESULT(VERSION as isize)
             }
             WM_ACTION => {
                 let f = Box::from_raw(lparam.0 as *mut Vec<String>);
@@ -146,12 +167,11 @@ fn resend() {
         let c = client().lock().unwrap();
         (c.handlers.keys().cloned().collect(), c.values.iter().map(|((p, k), v)| (p.clone(), k.clone(), v.clone())).collect())
     };
-    let me = window();
     for p in &hellos {
-        send(h, me, &["hello", p]);
+        to_host(h, &["hello", p]);
     }
     for (p, k, v) in &values {
-        send(h, me, &["set", p, k, v]);
+        to_host(h, &["set", p, k, v]);
     }
 }
 
@@ -159,9 +179,9 @@ fn resend() {
 /// Calmdesk shows, now and in widgets added later.
 pub fn set(package: &str, key: &str, value: &str) {
     client().lock().unwrap().values.insert((package.into(), key.into()), value.into());
-    let me = window();
+    window();
     if let Some(h) = host() {
-        send(h, me, &["set", package, key, value]);
+        to_host(h, &["set", package, key, value]);
     }
 }
 
@@ -169,9 +189,9 @@ pub fn set(package: &str, key: &str, value: &str) {
 /// widget of package `package` that Calmdesk shows. Runs on a thread of the engine's own.
 pub fn on_action(package: &str, f: impl Fn(&str, &str) + Send + Sync + 'static) {
     client().lock().unwrap().handlers.insert(package.into(), Arc::new(f));
-    let me = window();
+    window();
     if let Some(h) = host() {
-        send(h, me, &["hello", package]);
+        to_host(h, &["hello", package]);
     }
 }
 

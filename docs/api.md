@@ -49,6 +49,7 @@ While the engine runs (from callbacks too; changes apply right after the callbac
 | `drag_out(id, dir)` | A new package widget that follows the pointer while the left button is down and lands on the desktop where the user lets go. Call it from a pointer event. |
 | `close(id)` | Closes a widget or panel. Its saved position and settings stay. |
 | `set_hidden(bool)` | Hides or shows all desktop widgets. Panels stay. |
+| `set_fullscreen_hiding(bool)` | Fullscreen apps hide the widgets on their own monitor (on by default). |
 | `on_paint(widget, canvas, f)` | `Engine::on_paint` for widgets opened later. |
 | `popup_menu(x, y, &[MenuItem])` | The engine's own menu at a screen point (e.g. a tray icon). Returns the chosen item's action. `MenuItem::new(label, action)`, `.checked(bool)`, `.danger()`, `MenuItem::submenu(label, items)`. |
 | `tr(key)` | An engine string in the Windows display language. |
@@ -130,6 +131,7 @@ int main(void) {
 | `we_on_paint` | `Engine::on_paint`; `context` is an `ID2D1DeviceContext*` |
 | `we_hot_reload` | `Engine::hot_reload` |
 | `we_run`, `we_start`, `we_stop` | `Engine::run`, `Engine::start`, `widget_engine::stop` |
+| `we_host_set`, `we_host_on_action`, `we_host_version` | `host::set`, `host::on_action`, `host::host_version` (widgets Calmdesk shows) |
 | `we_last_error` | Message of the last failed call on this thread |
 
 Return codes: `WE_OK` (0), `WE_INVALID_ARGUMENT`, `WE_LOAD_FAILED`, `WE_RUNTIME_ERROR`,
