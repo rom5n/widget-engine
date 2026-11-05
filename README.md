@@ -3,7 +3,7 @@
 GPU-rendered desktop widgets for Windows 11. Your app embeds the engine and shows its own
 widgets on the desktop: below every window, next to the icons, at about 0% CPU while idle.
 
-![Clock, calendar and sparkline widgets on the desktop](docs/images/widgets.png)
+![The clock, calendar and sparkline examples in the light and dark themes](docs/images/examples.png)
 
 - **Native rendering:** D3D11, Direct2D, DirectWrite and DirectComposition through `windows-rs`.
   No WebView, no UI framework. Animations run in the compositor.
@@ -19,6 +19,11 @@ widgets on the desktop: below every window, next to the icons, at about 0% CPU w
   other widgets, kept inside the work area, positions saved per instance. Widgets hide while a
   fullscreen app runs and survive Explorer restarts, DPI changes and GPU resets.
 - **Rust and C APIs:** the `widget-engine` crate, and `widget.dll` + `widget.h` for any language.
+
+The same clock package in every background, light theme on top and dark below: frosted,
+liquid glass, solid and clear.
+
+![The clock example in the frosted, liquid glass, solid and clear backgrounds](docs/images/materials.png)
 
 ## Quick start (10 minutes)
 
@@ -119,4 +124,4 @@ shows every widget package it finds on the PC; see "Getting into the Calmdesk ga
 
 ## License
 
-MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your option.
+MIT, see [LICENSE](LICENSE).
