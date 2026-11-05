@@ -119,4 +119,4 @@ shows every widget package it finds on the PC; see "Getting into the Calmdesk ga
 
 ## License
 
-MIT OR Apache-2.0.
+MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your option.
