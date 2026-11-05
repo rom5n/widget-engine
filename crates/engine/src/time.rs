@@ -26,7 +26,7 @@ pub fn seconds_in_minute(st: &SYSTEMTIME) -> f32 {
 pub fn format_time(st: &SYSTEMTIME, seconds: bool) -> Vec<u16> {
     let flags = if seconds { TIME_FORMAT_FLAGS(0) } else { TIME_NOSECONDS };
     let mut buf = [0u16; 64];
-    let n = unsafe { GetTimeFormatEx(PCWSTR::null(), flags, Some(st), PCWSTR::null(), Some(&mut buf)) };
+    let n = unsafe { GetTimeFormatEx(crate::i18n::locale(), flags, Some(st), PCWSTR::null(), Some(&mut buf)) };
     buf[..(n.max(1) - 1) as usize].to_vec()
 }
 
@@ -34,7 +34,7 @@ pub fn format_time(st: &SYSTEMTIME, seconds: bool) -> Vec<u16> {
 pub fn format_date(st: &SYSTEMTIME) -> Vec<u16> {
     let mut buf = [0u16; 128];
     let n = unsafe {
-        GetDateFormatEx(PCWSTR::null(), DATE_LONGDATE, Some(st), PCWSTR::null(), Some(&mut buf), PCWSTR::null())
+        GetDateFormatEx(crate::i18n::locale(), DATE_LONGDATE, Some(st), PCWSTR::null(), Some(&mut buf), PCWSTR::null())
     };
     buf[..(n.max(1) - 1) as usize].to_vec()
 }
@@ -44,7 +44,7 @@ pub fn format_date(st: &SYSTEMTIME) -> Vec<u16> {
 pub(crate) fn clock_values(st: &SYSTEMTIME) -> Vec<(&'static str, String)> {
     let date = |f: PCWSTR| {
         let mut buf = [0u16; 64];
-        let n = unsafe { GetDateFormatEx(PCWSTR::null(), ENUM_DATE_FORMATS_FLAGS(0), Some(st), f, Some(&mut buf), PCWSTR::null()) };
+        let n = unsafe { GetDateFormatEx(crate::i18n::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(st), f, Some(&mut buf), PCWSTR::null()) };
         String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
     };
     let (h, m, s) = (st.wHour as f32, st.wMinute as f32, seconds_in_minute(st));
@@ -73,7 +73,7 @@ fn month_day(st: &SYSTEMTIME) -> String {
     let mut buf = [0u16; 64];
     // The locale's month-day pattern, "MMMM d" or "d MMMM" (DATE_MONTHDAY fails without a format).
     let pattern = windows::core::HSTRING::from(locale_string(LOCALE_SMONTHDAY));
-    let n = unsafe { GetDateFormatEx(PCWSTR::null(), ENUM_DATE_FORMATS_FLAGS(0), Some(st), &pattern, Some(&mut buf), PCWSTR::null()) };
+    let n = unsafe { GetDateFormatEx(crate::i18n::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(st), &pattern, Some(&mut buf), PCWSTR::null()) };
     String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
 }
 
@@ -132,7 +132,10 @@ fn weekday(year: i32, month: u32, day: u32) -> u32 {
 
 /// The user's first day of the week, 0 = Monday.
 fn first_day_of_week() -> u32 {
-    locale_string(LOCALE_IFIRSTDAYOFWEEK).trim().parse().unwrap_or(0) % 7
+    // The user's region, not the display language, decides where the week starts.
+    let mut buf = [0u16; 8];
+    let n = unsafe { GetLocaleInfoEx(PCWSTR::null(), LOCALE_IFIRSTDAYOFWEEK, Some(&mut buf)) };
+    String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize]).trim().parse().unwrap_or(0) % 7
 }
 
 /// First letter of the shortest localized weekday name, uppercase: "M", "T", "П".
@@ -143,7 +146,7 @@ fn weekday_initial(wd: u32) -> String {
 
 fn locale_string(kind: u32) -> String {
     let mut buf = [0u16; 32];
-    let n = unsafe { GetLocaleInfoEx(PCWSTR::null(), kind, Some(&mut buf)) };
+    let n = unsafe { GetLocaleInfoEx(crate::i18n::locale(), kind, Some(&mut buf)) };
     String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
 }
 

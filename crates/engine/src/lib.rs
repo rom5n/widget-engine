@@ -527,6 +527,12 @@ pub fn tr(key: &str) -> &str {
     i18n::t(key)
 }
 
+/// Locale name for date and time texts in the display language (see [`tr`]); null: the
+/// user's own formats. For `GetDateFormatEx` and friends.
+pub fn locale() -> PCWSTR {
+    i18n::locale()
+}
+
 /// What a package is, for galleries.
 #[derive(Clone, Debug)]
 pub struct PackageInfo {

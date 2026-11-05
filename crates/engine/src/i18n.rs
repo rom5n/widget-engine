@@ -3,23 +3,39 @@
 use std::sync::OnceLock;
 
 use windows::Win32::Globalization::{GetUserDefaultUILanguage, LCIDToLocaleName};
+use windows::core::{HSTRING, PCWSTR};
 
 /// Columns of [`STRINGS`] after the key.
 const LANGS: [&str; 12] = ["en", "ru", "uk", "de", "fr", "es", "it", "pt", "pl", "zh", "ja", "ko"];
 
 /// Primary language subtag of the Windows display language, e.g. "ru".
-/// `WIDGET_LANG` overrides it, for testing.
+/// `WIDGET_LANG` overrides it: the app's language setting.
 pub(crate) fn lang() -> &'static str {
     static LANG: OnceLock<String> = OnceLock::new();
-    LANG.get_or_init(|| {
-        if let Ok(l) = std::env::var("WIDGET_LANG") {
-            return l;
-        }
-        let mut name = [0u16; 85];
-        let n = unsafe { LCIDToLocaleName(GetUserDefaultUILanguage() as u32, Some(&mut name), 0) };
-        let tag = String::from_utf16_lossy(&name[..(n.max(1) - 1) as usize]);
-        tag.split('-').next().unwrap_or("en").to_lowercase()
-    })
+    LANG.get_or_init(|| std::env::var("WIDGET_LANG").unwrap_or_else(|_| system_lang()))
+}
+
+fn system_lang() -> String {
+    let mut name = [0u16; 85];
+    let n = unsafe { LCIDToLocaleName(GetUserDefaultUILanguage() as u32, Some(&mut name), 0) };
+    let tag = String::from_utf16_lossy(&name[..(n.max(1) - 1) as usize]);
+    tag.split('-').next().unwrap_or("en").to_lowercase()
+}
+
+/// Locale for date and time texts: null (the user's formats) unless another display
+/// language than Windows' is picked, then that language's ("en-US" for "en").
+pub(crate) fn locale() -> PCWSTR {
+    static LOCALE: OnceLock<Option<HSTRING>> = OnceLock::new();
+    let l = LOCALE.get_or_init(|| {
+        let lang = lang();
+        let region = match lang {
+            "en" => "US", "uk" => "UA", "zh" => "CN", "ja" => "JP", "ko" => "KR", "pt" => "BR",
+            _ => "",
+        };
+        let name = if region.is_empty() { format!("{lang}-{}", lang.to_uppercase()) } else { format!("{lang}-{region}") };
+        (lang != system_lang()).then(|| HSTRING::from(name))
+    });
+    l.as_ref().map_or(PCWSTR::null(), |h| PCWSTR(h.as_ptr()))
 }
 
 /// `key` in the display language. Keys are the English labels, with an optional "|context"
@@ -142,6 +158,19 @@ const STRINGS: &[[&str; 13]] = &[
     ["Hide widgets", "Hide widgets", "Скрыть виджеты", "Сховати віджети", "Widgets ausblenden", "Masquer les widgets", "Ocultar widgets", "Nascondi widget", "Ocultar widgets", "Ukryj widżety", "隐藏小组件", "ウィジェットを非表示", "위젯 숨기기"],
     ["Remove all widgets", "Remove all widgets", "Удалить все виджеты", "Видалити всі віджети", "Alle Widgets entfernen", "Supprimer tous les widgets", "Quitar todos los widgets", "Rimuovi tutti i widget", "Remover todos os widgets", "Usuń wszystkie widżety", "移除所有小组件", "すべてのウィジェットを削除", "모든 위젯 제거"],
     ["Start with Windows", "Start with Windows", "Запускать вместе с Windows", "Запускати разом з Windows", "Mit Windows starten", "Lancer au démarrage de Windows", "Iniciar con Windows", "Avvia con Windows", "Iniciar com o Windows", "Uruchamiaj z systemem Windows", "随 Windows 启动", "Windows と同時に起動", "Windows 시작 시 실행"],
+    ["Settings", "Settings", "Настройки", "Налаштування", "Einstellungen", "Paramètres", "Configuración", "Impostazioni", "Configurações", "Ustawienia", "设置", "設定", "설정"],
+    ["Hide widgets during fullscreen apps", "Hide widgets during fullscreen apps", "Скрывать виджеты в полноэкранных приложениях", "Ховати віджети в повноекранних застосунках", "Widgets bei Vollbild-Apps ausblenden", "Masquer les widgets pendant les apps en plein écran", "Ocultar widgets con apps en pantalla completa", "Nascondi i widget con app a schermo intero", "Ocultar widgets com apps em tela cheia", "Ukrywaj widżety w aplikacjach pełnoekranowych", "全屏应用时隐藏小组件", "全画面アプリの実行中はウィジェットを隠す", "전체 화면 앱에서 위젯 숨기기"],
+    ["Language", "Language", "Язык", "Мова", "Sprache", "Langue", "Idioma", "Lingua", "Idioma", "Język", "语言", "言語", "언어"],
+    ["System default", "System default", "Как в системе", "Як у системі", "Systemstandard", "Langue du système", "Predeterminado del sistema", "Predefinita di sistema", "Padrão do sistema", "Domyślny systemowy", "系统默认", "システムの既定", "시스템 기본값"],
+    ["Export widgets", "Export widgets", "Экспорт виджетов", "Експорт віджетів", "Widgets exportieren", "Exporter les widgets", "Exportar widgets", "Esporta widget", "Exportar widgets", "Eksportuj widżety", "导出小组件", "ウィジェットをエクスポート", "위젯 내보내기"],
+    ["Import widgets", "Import widgets", "Импорт виджетов", "Імпорт віджетів", "Widgets importieren", "Importer les widgets", "Importar widgets", "Importa widget", "Importar widgets", "Importuj widżety", "导入小组件", "ウィジェットをインポート", "위젯 가져오기"],
+    ["Open log folder", "Open log folder", "Открыть папку журналов", "Відкрити теку журналів", "Protokollordner öffnen", "Ouvrir le dossier des journaux", "Abrir carpeta de registros", "Apri cartella dei log", "Abrir pasta de logs", "Otwórz folder dzienników", "打开日志文件夹", "ログ フォルダーを開く", "로그 폴더 열기"],
+    ["Check for updates", "Check for updates", "Проверить обновления", "Перевірити оновлення", "Nach Updates suchen", "Rechercher des mises à jour", "Buscar actualizaciones", "Controlla aggiornamenti", "Verificar atualizações", "Sprawdź aktualizacje", "检查更新", "更新を確認", "업데이트 확인"],
+    ["Update available", "Update available", "Доступно обновление", "Доступне оновлення", "Update verfügbar", "Mise à jour disponible", "Actualización disponible", "Aggiornamento disponibile", "Atualização disponível", "Dostępna aktualizacja", "有可用更新", "更新があります", "업데이트 있음"],
+    ["Calmdesk is up to date.", "Calmdesk is up to date.", "У вас последняя версия Calmdesk.", "У вас остання версія Calmdesk.", "Calmdesk ist auf dem neuesten Stand.", "Calmdesk est à jour.", "Calmdesk está actualizado.", "Calmdesk è aggiornato.", "O Calmdesk está atualizado.", "Calmdesk jest aktualny.", "Calmdesk 已是最新版本。", "Calmdesk は最新です。", "Calmdesk가 최신 버전입니다."],
+    ["A new version of Calmdesk is out. Open its page?", "A new version of Calmdesk is out. Open its page?", "Вышла новая версия Calmdesk. Открыть её страницу?", "Вийшла нова версія Calmdesk. Відкрити її сторінку?", "Eine neue Version von Calmdesk ist da. Seite öffnen?", "Une nouvelle version de Calmdesk est disponible. Ouvrir sa page ?", "Hay una nueva versión de Calmdesk. ¿Abrir su página?", "È uscita una nuova versione di Calmdesk. Aprire la pagina?", "Saiu uma nova versão do Calmdesk. Abrir a página?", "Jest nowa wersja Calmdesk. Otworzyć jej stronę?", "Calmdesk 有新版本。打开其页面？", "Calmdesk の新しいバージョンがあります。ページを開きますか?", "Calmdesk 새 버전이 나왔습니다. 페이지를 열까요?"],
+    ["Could not check for updates.", "Could not check for updates.", "Не удалось проверить обновления.", "Не вдалося перевірити оновлення.", "Suche nach Updates fehlgeschlagen.", "Impossible de rechercher des mises à jour.", "No se pudieron buscar actualizaciones.", "Impossibile controllare gli aggiornamenti.", "Não foi possível verificar atualizações.", "Nie udało się sprawdzić aktualizacji.", "无法检查更新。", "更新を確認できませんでした。", "업데이트를 확인할 수 없습니다."],
+    ["No backup found:", "No backup found:", "Резервная копия не найдена:", "Резервну копію не знайдено:", "Keine Sicherung gefunden:", "Aucune sauvegarde trouvée :", "No se encontró ninguna copia:", "Nessun backup trovato:", "Nenhum backup encontrado:", "Nie znaleziono kopii:", "未找到备份：", "バックアップが見つかりません:", "백업을 찾을 수 없음:"],
     ["Quit", "Quit", "Выйти", "Вийти", "Beenden", "Quitter", "Salir", "Esci", "Sair", "Zakończ", "退出", "終了", "종료"],
     ["Install", "Install", "Установить", "Встановити", "Installieren", "Installer", "Instalar", "Installa", "Instalar", "Zainstaluj", "安装", "インストール", "설치"],
     ["Installing…", "Installing…", "Установка…", "Встановлення…", "Wird installiert…", "Installation…", "Instalando…", "Installazione…", "Instalando…", "Instalowanie…", "正在安装…", "インストール中…", "설치 중…"],
