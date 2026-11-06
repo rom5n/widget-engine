@@ -108,6 +108,10 @@ impl Markup {
         }
         for (k, val) in self.app.borrow().iter() {
             v.insert(format!("app.{k}"), val.clone());
+            // `[[source]]` values: the host sets "src.<key>", the layout reads {src.<key>}.
+            if k.starts_with("src.") {
+                v.insert(k.clone(), val.clone());
+            }
         }
         if let (Some(f), Some(name)) = (self.drag, self.pressed.and_then(|id| node_by_id(&self.pkg.root, id)).and_then(|n| n.attr("drag"))) {
             v.insert(format!("drag.{name}"), format!("{:.2}", f * 100.0));

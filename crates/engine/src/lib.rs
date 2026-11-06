@@ -553,12 +553,31 @@ pub struct PackageInfo {
     pub homepage: String,
     /// `icon` from widget.toml, as an absolute path.
     pub icon: Option<std::path::PathBuf>,
+    /// `[[source]]` tables: values the host fetches and sets as `src.<key>`.
+    pub sources: Vec<Source>,
+}
+
+/// A `[[source]]` from widget.toml. The engine only reads it: the host fetches the value and
+/// sets it with [`set`] as `src.<key>`, shown by `{src.<key>}`. Empty strings: not set.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Source {
+    pub key: String,
+    /// `http(s)://` address. May contain `{opt.<key>}`. Either this or `file`.
+    pub url: String,
+    /// A local file. Either this or `url`.
+    pub file: String,
+    /// Dotted path into a JSON answer, `[n]` for array items, e.g. `data.items[0].price`.
+    pub json: String,
+    /// The answer is an RSS or Atom feed: `src.<key>.<n>.title` and `.link` for its first items.
+    pub rss: bool,
+    /// How often, e.g. "30m"; the host picks a default and a minimum.
+    pub every: String,
 }
 
 /// Reads and checks a package without showing it. Fails like [`Engine::load`].
 pub fn package_info(dir: impl AsRef<std::path::Path>) -> Result<PackageInfo> {
     let p = package::load(dir.as_ref())?;
-    Ok(PackageInfo { id: p.id, name: p.name, category: p.category, variant: p.variant, size: p.size, author: p.author, version: p.version, homepage: p.homepage, icon: p.icon })
+    Ok(PackageInfo { id: p.id, name: p.name, category: p.category, variant: p.variant, size: p.size, author: p.author, version: p.version, homepage: p.homepage, icon: p.icon, sources: p.sources })
 }
 
 /// Changes to the running engine, applied by the host window outside any state borrow: the

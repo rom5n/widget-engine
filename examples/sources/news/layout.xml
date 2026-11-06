@@ -1,0 +1,8 @@
+<widget>
+  <column padding="18" gap="8">
+    <text value="Hacker News" size="13" color="secondary"/>
+    <text value="{src.hn.1.title}" size="15" weight="600" action="open:{src.hn.1.link}"/>
+    <text value="{src.hn.2.title}" size="15" weight="600" action="open:{src.hn.2.link}"/>
+    <text value="{src.hn.3.title}" size="15" weight="600" action="open:{src.hn.3.link}"/>
+  </column>
+</widget>

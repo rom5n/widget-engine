@@ -1,0 +1,6 @@
+<widget>
+  <column padding="18" gap="4">
+    <text value="BTC / USD" size="13" color="secondary"/>
+    <text value="${src.price}" size="30" weight="700" fit="true"/>
+  </column>
+</widget>

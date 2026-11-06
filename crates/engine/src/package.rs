@@ -23,6 +23,7 @@ pub(crate) struct Package {
     pub homepage: String,
     /// Absolute path of `icon`, when set.
     pub icon: Option<PathBuf>,
+    pub sources: Vec<crate::Source>,
     /// `{str.<key>}` values: every key of the `[strings.*]` tables, in the display language
     /// (the key itself when there is no translation).
     pub texts: BTreeMap<String, String>,
@@ -66,6 +67,27 @@ pub(crate) fn load(dir: &Path) -> Result<Package> {
         Some(i) => return Err(invalid(format!("widget.toml: icon \"{i}\" is not a file in the package"))),
         None => None,
     };
+    let mut sources = Vec::new();
+    for s in &manifest.source {
+        let ok_key = !s.key.is_empty() && s.key.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-');
+        if !ok_key {
+            return Err(invalid(format!("widget.toml: source key \"{}\": use letters, digits, '_' and '-'", s.key)));
+        }
+        if s.url.is_some() == s.file.is_some() {
+            return Err(invalid(format!("widget.toml: source \"{}\" needs either url or file", s.key)));
+        }
+        if s.url.as_deref().is_some_and(|u| !u.starts_with("https://") && !u.starts_with("http://")) {
+            return Err(invalid(format!("widget.toml: source \"{}\": url must start with https://", s.key)));
+        }
+        sources.push(crate::Source {
+            key: s.key.clone(),
+            url: s.url.clone().unwrap_or_default(),
+            file: s.file.clone().unwrap_or_default(),
+            json: s.json.clone().unwrap_or_default(),
+            rss: s.rss.unwrap_or(false),
+            every: s.every.clone().unwrap_or_default(),
+        });
+    }
     let strings = manifest.strings.get(crate::i18n::lang());
     let tr = |s: &str| strings.and_then(|m| m.get(s)).map_or(s, |v| v.as_str()).to_string();
     Ok(Package {
@@ -78,6 +100,7 @@ pub(crate) fn load(dir: &Path) -> Result<Package> {
         version: manifest.version.clone().unwrap_or_default(),
         homepage: manifest.homepage.clone().unwrap_or_default(),
         icon,
+        sources,
         texts: manifest.strings.values().flat_map(|m| m.keys()).map(|k| (k.clone(), tr(k))).collect(),
         size: (manifest.size[0], manifest.size[1]),
         customization: manifest.customization()?,
@@ -133,9 +156,23 @@ struct Manifest {
     customize: CustomizeToml,
     #[serde(default)]
     option: Vec<OptionToml>,
+    /// Values the host fetches for `{src.<key>}`.
+    #[serde(default)]
+    source: Vec<SourceToml>,
     /// Translations of option labels: language ("ru", "de", ...) -> English label -> label.
     #[serde(default)]
     strings: BTreeMap<String, BTreeMap<String, String>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceToml {
+    key: String,
+    url: Option<String>,
+    file: Option<String>,
+    json: Option<String>,
+    rss: Option<bool>,
+    every: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -432,6 +469,23 @@ fn convert(doc: &roxmltree::Document, n: roxmltree::Node, styles: &Styles, next:
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sources() {
+        let dir = std::env::temp_dir().join(format!("widgine-source-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("layout.xml"), "<widget><text value='{src.btc}'/></widget>").unwrap();
+        let toml = |src: &str| format!("id='a.b'\nname='A'\nengine='^0.1'\nsize=[10,10]\n{src}");
+        std::fs::write(dir.join("widget.toml"), toml("[[source]]\nkey='btc'\nurl='https://x/y'\njson='data.amount'\nevery='5m'")).unwrap();
+        let p = load(&dir).unwrap();
+        assert_eq!((p.sources[0].key.as_str(), p.sources[0].json.as_str(), p.sources[0].every.as_str()), ("btc", "data.amount", "5m"));
+        std::fs::write(dir.join("widget.toml"), toml("[[source]]\nkey='a b'\nurl='https://x'")).unwrap();
+        assert!(load(&dir).is_err(), "bad key");
+        std::fs::write(dir.join("widget.toml"), toml("[[source]]\nkey='a'")).unwrap();
+        assert!(load(&dir).is_err(), "no url or file");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn store_fields_and_icon() {

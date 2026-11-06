@@ -1,0 +1,18 @@
+id = "com.example.github-stars"
+name = "GitHub stars"
+category = "Other"
+engine = "^0.1"
+size = [220, 120]
+author = "widgine examples"
+version = "1.0.0"
+icon = "assets/icon.svg"
+
+[card]
+radius = 22
+background = "frosted"
+
+[[source]]
+key = "stars"
+url = "https://api.github.com/repos/rom5n/widgine"
+json = "stargazers_count"
+every = "1h"

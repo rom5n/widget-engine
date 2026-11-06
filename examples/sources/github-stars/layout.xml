@@ -1,0 +1,6 @@
+<widget>
+  <column padding="18" gap="4">
+    <text value="rom5n/widgine" size="13" color="secondary"/>
+    <text value="★ {src.stars}" size="30" weight="700"/>
+  </column>
+</widget>

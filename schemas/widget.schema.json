@@ -15,6 +15,23 @@
     "version": { "type": "string", "pattern": "^\\d+(\\.\\d+)*$", "description": "Package version, e.g. \"1.2.0\". A store compares it to offer updates." },
     "homepage": { "type": "string", "format": "uri", "description": "The author's page for the widget." },
     "icon": { "type": "string", "description": "Square icon in the package (SVG, or PNG of at least 64x64 px), e.g. \"assets/icon.svg\". Required in the Calmdesk store." },
+    "source": {
+      "type": "array",
+      "description": "Values the host fetches for {src.<key>} (Calmdesk: every minute at most).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+          "url": { "type": "string", "pattern": "^https?://", "description": "May contain {opt.<key>}." },
+          "file": { "type": "string", "description": "A local file: its first line, or the json path." },
+          "json": { "type": "string", "description": "Dotted path into the JSON answer, [n] for array items, e.g. data.items[0].price." },
+          "rss": { "type": "boolean", "description": "RSS or Atom feed: {src.<key>.1.title}, {src.<key>.1.link}, ..." },
+          "every": { "type": "string", "pattern": "^\\d+[smhd]$", "description": "How often, e.g. \"5m\". Default 15m, at least 1m." }
+        }
+      }
+    },
     "engine": { "type": "string", "pattern": "^\\^?\\d+\\.\\d+", "description": "Compatible engine versions, e.g. \"^0.1\"." },
     "size": {
       "type": "array",
