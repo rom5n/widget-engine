@@ -545,12 +545,18 @@ pub struct PackageInfo {
     pub variant: String,
     /// DIPs.
     pub size: (f32, f32),
+    /// `author`, `version` and `homepage` from widget.toml. Empty when not set.
+    pub author: String,
+    pub version: String,
+    pub homepage: String,
+    /// `icon` from widget.toml, as an absolute path.
+    pub icon: Option<std::path::PathBuf>,
 }
 
 /// Reads and checks a package without showing it. Fails like [`Engine::load`].
 pub fn package_info(dir: impl AsRef<std::path::Path>) -> Result<PackageInfo> {
     let p = package::load(dir.as_ref())?;
-    Ok(PackageInfo { id: p.id, name: p.name, category: p.category, variant: p.variant, size: p.size })
+    Ok(PackageInfo { id: p.id, name: p.name, category: p.category, variant: p.variant, size: p.size, author: p.author, version: p.version, homepage: p.homepage, icon: p.icon })
 }
 
 /// Changes to the running engine, applied by the host window outside any state borrow: the

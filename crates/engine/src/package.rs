@@ -18,6 +18,11 @@ pub(crate) struct Package {
     pub category: String,
     /// Translated, like `category`.
     pub variant: String,
+    pub author: String,
+    pub version: String,
+    pub homepage: String,
+    /// Absolute path of `icon`, when set.
+    pub icon: Option<PathBuf>,
     /// `{str.<key>}` values: every key of the `[strings.*]` tables, in the display language
     /// (the key itself when there is no translation).
     pub texts: BTreeMap<String, String>,
@@ -56,6 +61,11 @@ pub(crate) fn load(dir: &Path) -> Result<Package> {
         toml::from_str(&read("widget.toml")?).map_err(|e| invalid(format!("widget.toml: {e}")))?;
     check_engine_version(&manifest.engine)?;
     let root = parse_layout(&read("layout.xml")?)?;
+    let icon = match manifest.icon.as_deref() {
+        Some(i) if Path::new(i).components().all(|c| matches!(c, std::path::Component::Normal(_))) && dir.join(i).is_file() => Some(dir.join(i)),
+        Some(i) => return Err(invalid(format!("widget.toml: icon \"{i}\" is not a file in the package"))),
+        None => None,
+    };
     let strings = manifest.strings.get(crate::i18n::lang());
     let tr = |s: &str| strings.and_then(|m| m.get(s)).map_or(s, |v| v.as_str()).to_string();
     Ok(Package {
@@ -64,6 +74,10 @@ pub(crate) fn load(dir: &Path) -> Result<Package> {
         name: tr(&manifest.name),
         category: manifest.category.as_deref().map(tr).unwrap_or_default(),
         variant: manifest.variant.as_deref().map(tr).unwrap_or_default(),
+        author: manifest.author.clone().unwrap_or_default(),
+        version: manifest.version.clone().unwrap_or_default(),
+        homepage: manifest.homepage.clone().unwrap_or_default(),
+        icon,
         texts: manifest.strings.values().flat_map(|m| m.keys()).map(|k| (k.clone(), tr(k))).collect(),
         size: (manifest.size[0], manifest.size[1]),
         customization: manifest.customization()?,
@@ -101,6 +115,14 @@ struct Manifest {
     category: Option<String>,
     /// Which variant of a widget this is, e.g. "Small", shown under its name in a gallery.
     variant: Option<String>,
+    /// Who made it, shown in a gallery.
+    author: Option<String>,
+    /// Package version, e.g. "1.2.0". A store compares it to offer updates.
+    version: Option<String>,
+    /// The author's page for the widget.
+    homepage: Option<String>,
+    /// Square icon in the package, e.g. "assets/icon.svg".
+    icon: Option<String>,
     /// Compatible engine versions, e.g. "^0.1".
     engine: String,
     /// Width and height in DIPs.
@@ -410,6 +432,30 @@ fn convert(doc: &roxmltree::Document, n: roxmltree::Node, styles: &Styles, next:
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn store_fields_and_icon() {
+        let dir = std::env::temp_dir().join(format!("widgine-icon-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("assets")).unwrap();
+        std::fs::write(dir.join("layout.xml"), "<widget><text value='a'/></widget>").unwrap();
+        let toml = |icon: &str| format!("id='a.b'
+name='A'
+engine='^0.1'
+size=[10,10]
+author='Me'
+version='1.2'
+{icon}");
+        std::fs::write(dir.join("widget.toml"), toml("icon='assets/i.svg'")).unwrap();
+        assert!(load(&dir).is_err(), "missing icon file");
+        std::fs::write(dir.join("assets/i.svg"), "<svg/>").unwrap();
+        let p = load(&dir).unwrap();
+        assert_eq!((p.author.as_str(), p.version.as_str()), ("Me", "1.2"));
+        assert_eq!(p.icon, Some(dir.join("assets/i.svg")));
+        std::fs::write(dir.join("widget.toml"), toml("icon='../x.svg'")).unwrap();
+        assert!(load(&dir).is_err(), "icon outside the package");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn layout_errors_name_the_line() {

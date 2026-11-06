@@ -30,6 +30,11 @@ category = "Time"             # gallery section; Time, Media, System, Photos, Pr
                               # Weather are translated; empty: "Other"
 engine = "^0.1"               # compatible engine versions
 size = [300, 150]             # DIPs
+author = "Your Name"          # optional: shown in the gallery
+version = "1.0.0"             # optional: the Calmdesk store offers updates when it goes up
+homepage = "https://..."      # optional: your page for the widget
+icon = "assets/icon.svg"      # optional: square SVG, or PNG of at least 64x64 px;
+                              # required in the Calmdesk store
 
 [card]                        # engine-drawn background; leave out to draw your own
 radius = 24                   # corner radius, the same outline for every background

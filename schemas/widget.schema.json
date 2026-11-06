@@ -11,6 +11,10 @@
     "name": { "type": "string" },
     "category": { "type": "string", "description": "Gallery section, e.g. \"Time\". Translated through [strings.<lang>] like name." },
     "variant": { "type": "string", "description": "Which variant of a widget this is, e.g. \"Small\", shown under its name in a gallery. Translated like name." },
+    "author": { "type": "string", "description": "Who made the widget, shown in a gallery." },
+    "version": { "type": "string", "pattern": "^\\d+(\\.\\d+)*$", "description": "Package version, e.g. \"1.2.0\". A store compares it to offer updates." },
+    "homepage": { "type": "string", "format": "uri", "description": "The author's page for the widget." },
+    "icon": { "type": "string", "description": "Square icon in the package (SVG, or PNG of at least 64x64 px), e.g. \"assets/icon.svg\". Required in the Calmdesk store." },
     "engine": { "type": "string", "pattern": "^\\^?\\d+\\.\\d+", "description": "Compatible engine versions, e.g. \"^0.1\"." },
     "size": {
       "type": "array",
