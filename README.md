@@ -43,6 +43,8 @@ How it stays this light:
 - **Two text files.** `widget.toml` describes the widget, `layout.xml` draws it. No code
   needed for a clock, a calendar or a widget your app feeds.
 - **One command to start:** `widget-dev new widgets/hello` writes a working widget to edit.
+- **One file to share:** `widget-dev pack widgets/hello` writes a `.cdwidget` that Calmdesk
+  users install with a double-click.
 - **Live reload.** Save a file and the widget on the desktop updates instantly. Mistakes
   print with the file and line, and the last good version stays on screen.
 - **Autocomplete in your editor.** JSON Schema and XML Schema ship with the engine, so VS Code

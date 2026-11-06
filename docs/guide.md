@@ -195,7 +195,14 @@ Put the package where Calmdesk looks for it, from your app's installer:
   (or `HKLM`), with the package folder as data.
 - Or inside your app's own folder in Program Files, `%LOCALAPPDATA%\Programs` or `%APPDATA%`.
 
-Without an installer, ship a zip that users unpack into `%LOCALAPPDATA%\Widgets`. On
+Without an installer, ship a `.cdwidget` file. Users double-click it, Calmdesk asks once and
+installs the widget into `%LOCALAPPDATA%\Widgets`:
+
+```bash
+widget-dev pack widgets/weather
+```
+
+That writes `com.yourname.weather.cdwidget`, a zip of the package folder. On
 uninstall, remove the folder (and the registry value); its widgets leave the desktop at the
 next start.
 

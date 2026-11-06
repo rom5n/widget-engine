@@ -139,8 +139,10 @@ From C: `we_host_set(package, key, value)`, `we_host_on_action(package, f, user)
    settings, so keep it across versions.
 2. Check it: `widget-dev <dir>` prints any error with file and line. Try light and dark
    themes and a few sizes from the right-click menu.
-3. Ship it with your app's installer into one of the places above, or as a zip users unpack
-   into `%LOCALAPPDATA%\Widgets\<package>`. Calmdesk finds it the next time its gallery opens.
+3. Ship it with your app's installer into one of the places above, or as a `.cdwidget` file:
+   `widget-dev pack <package-dir>` writes one, and Calmdesk users double-click it to install
+   the widget into `%LOCALAPPDATA%\Widgets\<id>`. Calmdesk finds it the next time its gallery
+   opens. `widget-dev --check <package-dir>` checks a package without showing it.
 4. Uninstall: remove the folder (and the registry value if you added one). Widgets of a
    package that is gone disappear from the desktop at the next start.
 5. If your app feeds the widget, it does so only while it runs: give the layout sensible

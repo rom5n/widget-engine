@@ -3,6 +3,8 @@
 //!
 //! Usage: widget-dev <package-dir>
 //!        widget-dev new <package-dir>   (a new package to start from)
+//!        widget-dev --check <package-dir>   (checks it, exits non-zero on an error)
+//!        widget-dev pack <package-dir> [out.cdwidget]   (a file users double-click to install)
 //!        widget-dev --schema > schemas/layout.xsd
 //! Example: cargo run -p widgine --bin widget-dev --release -- widgets/clock
 
@@ -13,11 +15,34 @@ fn main() {
     let Some(dir) = std::env::args().nth(1) else {
         eprintln!("usage: widget-dev <package-dir>");
         eprintln!("       widget-dev new <package-dir>   (creates a package to start from)");
+        eprintln!("       widget-dev --check <package-dir>   (checks a package)");
+        eprintln!("       widget-dev pack <package-dir> [out.cdwidget]   (a file for Calmdesk users)");
         eprintln!("       widget-dev --schema   (prints the layout.xml schema)");
         std::process::exit(2);
     };
     if dir == "--schema" {
         print!("{}", widgine::layout_schema());
+        return;
+    }
+    if dir == "--check" || dir == "pack" {
+        let Some(package) = std::env::args().nth(2) else {
+            eprintln!("usage: widget-dev {dir} <package-dir>");
+            std::process::exit(2);
+        };
+        let info = widgine::package_info(&package).unwrap_or_else(|e| {
+            eprintln!("{e}");
+            std::process::exit(1);
+        });
+        if dir == "--check" {
+            eprintln!("{package}: {} ({}) is fine", info.name, info.id);
+            return;
+        }
+        let out = std::env::args().nth(3).unwrap_or_else(|| format!("{}.cdwidget", info.id));
+        if let Err(e) = pack(std::path::Path::new(&package), std::path::Path::new(&out)) {
+            eprintln!("{out}: {e}");
+            std::process::exit(1);
+        }
+        eprintln!("wrote {out}. Calmdesk installs it on a double-click.");
         return;
     }
     if dir == "new" {
@@ -47,6 +72,17 @@ fn main() {
         eprintln!("{e}");
         std::process::exit(1);
     }
+}
+
+/// Zips the package folder's contents into `out` with the tar.exe that ships with Windows.
+fn pack(dir: &std::path::Path, out: &std::path::Path) -> std::io::Result<()> {
+    let _ = std::fs::remove_file(out);
+    let out = std::path::absolute(out)?;
+    let status = std::process::Command::new("tar.exe").arg("--format").arg("zip").arg("-cf").arg(&out).arg("-C").arg(dir).arg(".").status()?;
+    if !status.success() {
+        return Err(std::io::Error::other(format!("tar.exe failed ({status})")));
+    }
+    Ok(())
 }
 
 /// A package folder with a clock-like widget.toml and layout.xml. Never overwrites.
