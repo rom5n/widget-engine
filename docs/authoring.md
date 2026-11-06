@@ -231,6 +231,35 @@ Any attribute may contain `{name}`:
 | `str` | `{str.Battery}`: a text of the `[strings.*]` tables in the display language, the English key when there is none. |
 | `theme` | `theme.dark`: on/off. |
 | `app` | Values the app sets with `Engine::set` / `we_set`. |
+| `src` | `[[source]]` values from `widget.toml`, fetched by the host (Calmdesk). See below. |
+
+### Data sources
+
+A widget can show data from the web or a file without any code. Declare a source in
+`widget.toml`, show it with `{src.<key>}`:
+
+```toml
+[[source]]
+key = "price"
+url = "https://api.coinbase.com/v2/prices/BTC-USD/spot"
+json = "data.amount"          # dotted path into the JSON answer, [n] for array items
+every = "5m"                  # default 15m, at least 1m
+```
+
+```xml
+<text value="${src.price}"/>
+```
+
+- `url` with `json`: one value from a JSON answer. Without `json`: the answer's first line.
+- `url` with `rss = true`: an RSS or Atom feed, `{src.<key>.1.title}`, `{src.<key>.1.link}`,
+  and so on for the first 10 items.
+- `file` instead of `url`: a local text file, its first line or the `json` path, read again
+  every 15 seconds.
+- `url` may use options: `url = "https://example.com/price/{opt.symbol}"`.
+
+Calmdesk fetches each address once for all widgets that use it and keeps the last values, so
+widgets show data at start and offline. There is no command source: packages stay code-free.
+`examples/sources` has a crypto price, a GitHub star count and a news feed.
 
 ### Actions
 
