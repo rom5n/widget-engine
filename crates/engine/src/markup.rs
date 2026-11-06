@@ -286,7 +286,7 @@ impl Widget for Markup {
         let before = (self.states(), self.drag);
         match event {
             Event::Timer | Event::TimeChanged | Event::DataChanged => return self.tick(scene, false),
-            Event::Wheel { .. } | Event::Char(_) => return Ok(()),
+            Event::Wheel { .. } | Event::Char(_) | Event::RightClick { .. } => return Ok(()),
             Event::PointerMove { x, y } => {
                 self.pointer = Some((x, y));
                 if self.drag.is_some() {

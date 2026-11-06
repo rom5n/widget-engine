@@ -106,6 +106,8 @@ pub enum Event {
     /// Left button down. A double-click outside [`Widget::interactive`] parts starts a move instead.
     PointerDown { x: f32, y: f32 },
     PointerUp { x: f32, y: f32 },
+    /// Right button released over a panel. Panels get this instead of the settings menu.
+    RightClick { x: f32, y: f32 },
     /// The app changed a value with [`set`].
     DataChanged,
     /// Mouse wheel over the widget. `delta` is in notches, positive away from the user (scroll up).
@@ -1426,6 +1428,10 @@ extern "system" fn widget_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPA
             }
             // Right-click: settings, when the developer allows any.
             WM_RBUTTONDOWN => return LRESULT(0),
+            WM_RBUTTONUP if place_of(hwnd) == Some(Place::Panel) => {
+                with_state(|s| s.pointer(hwnd, point_from(lparam), |x, y| Event::RightClick { x, y }));
+                return LRESULT(0);
+            }
             WM_RBUTTONUP => {
                 let mut pt = point_from(lparam);
                 let _ = ClientToScreen(hwnd, &mut pt);
