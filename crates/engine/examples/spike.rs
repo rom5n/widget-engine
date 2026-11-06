@@ -8,7 +8,7 @@
 //! Drag the widget with the mouse. Esc quits.
 //! To test the inactive state: press a key, then click the desktop and look at the widget.
 //!
-//! Run: cargo run -p widget-engine --example spike --release
+//! Run: cargo run -p widgine --example spike --release
 
 #![windows_subsystem = "windows"]
 

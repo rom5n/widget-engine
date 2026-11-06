@@ -1,18 +1,18 @@
 //! Package widget with app-drawn content: widgets/sparkline draws its chart through a
 //! `<canvas id="chart"/>` paint callback, and its Refresh button calls back into the app.
 //! It also shows liquid glass, a card shadow, hover/pressed button states, and an app value
-//! (`{app.peak}`) set with `Engine::set` and `widget_engine::set`.
+//! (`{app.peak}`) set with `Engine::set` and `widgine::set`.
 //!
-//! Run: cargo run -p widget-engine --example sparkline --release
+//! Run: cargo run -p widgine --example sparkline --release
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use widget_engine::windows::Win32::Graphics::Direct2D::Common::*;
-use widget_engine::windows::Win32::Graphics::Direct2D::*;
-use widget_engine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
-use widget_engine::windows_numerics::Vector2;
-use widget_engine::{Engine, rgba};
+use widgine::windows::Win32::Graphics::Direct2D::Common::*;
+use widgine::windows::Win32::Graphics::Direct2D::*;
+use widgine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
+use widgine::windows_numerics::Vector2;
+use widgine::{Engine, rgba};
 
 /// Some made-up activity data. A real app would fill this from its own source.
 fn sample(seed: u32) -> Vec<f32> {
@@ -28,7 +28,7 @@ fn sample(seed: u32) -> Vec<f32> {
         .collect()
 }
 
-fn main() -> widget_engine::windows::core::Result<()> {
+fn main() -> widgine::windows::core::Result<()> {
     let mut engine = Engine::new();
     let x = unsafe { GetSystemMetrics(SM_CXSCREEN) } - 480;
     engine.load("sparkline", concat!(env!("CARGO_MANIFEST_DIR"), "/../../examples/widgets/sparkline"), x, 420)?;
@@ -68,7 +68,7 @@ fn main() -> widget_engine::windows::core::Result<()> {
             d.0 += 1;
             d.1 = sample(d.0);
             // App values can change at any time while the engine runs.
-            widget_engine::set(widget, "peak", &peak(&d.1));
+            widgine::set(widget, "peak", &peak(&d.1));
         }
         eprintln!("{widget}: {action}");
     });

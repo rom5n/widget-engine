@@ -16,7 +16,7 @@
     <canvas id="chart" grow="1" opacity="0.95" hover.opacity="1" transition="150" shadow="0 0 8 accent"/>
     <row gap="6">
       <text value="Updated {clock.time}" size="12" weight="400" color="secondary" grow="1"/>
-      <!-- Set by the app: Engine::set / widget_engine::set("sparkline", "peak", ...). -->
+      <!-- Set by the app: Engine::set / widgine::set("sparkline", "peak", ...). -->
       <text value="Peak {app.peak}" size="12" weight="500" color="secondary"/>
     </row>
   </column>

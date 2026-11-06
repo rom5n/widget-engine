@@ -1,4 +1,4 @@
-//! C ABI over `widget-engine`. Builds `widget.dll` (+ `widget.dll.lib`); the header is
+//! C ABI over `widgine`. Builds `widget.dll` (+ `widget.dll.lib`); the header is
 //! `include/widget.h`. It mirrors the Rust API one-to-one with an opaque engine handle and
 //! `int` error codes. All calls must come from the thread that created the engine.
 
@@ -6,8 +6,8 @@ use std::cell::RefCell;
 use std::ffi::{CStr, CString, c_char, c_int, c_void};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
-use widget_engine::Engine;
-use widget_engine::windows::core::{HRESULT, Interface};
+use widgine::Engine;
+use widgine::windows::core::{HRESULT, Interface};
 
 pub const WE_OK: c_int = 0;
 /// A null pointer or a string that is not UTF-8.
@@ -89,7 +89,7 @@ pub unsafe extern "C" fn we_set(widget: *const c_char, key: *const c_char, value
     let (Some(w), Some(k), Some(v)) = (unsafe { text(widget) }, unsafe { text(key) }, unsafe { text(value) }) else {
         return fail(WE_INVALID_ARGUMENT, "we_set: null or non-UTF-8 argument");
     };
-    widget_engine::set(w, k, v);
+    widgine::set(w, k, v);
     WE_OK
 }
 
@@ -105,13 +105,13 @@ pub unsafe extern "C" fn we_on_action(engine: *mut WeEngine, f: WeActionFn, user
 }
 
 /// `{app.key}` = `value` in every widget of package `package` that Calmdesk shows (see
-/// `widget_engine::host`). Any thread; no engine needed.
+/// `widgine::host`). Any thread; no engine needed.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn we_host_set(package: *const c_char, key: *const c_char, value: *const c_char) -> c_int {
     let (Some(p), Some(k), Some(v)) = (unsafe { text(package) }, unsafe { text(key) }, unsafe { text(value) }) else {
         return fail(WE_INVALID_ARGUMENT, "we_host_set: null or non-UTF-8 argument");
     };
-    widget_engine::host::set(p, k, v);
+    widgine::host::set(p, k, v);
     WE_OK
 }
 
@@ -122,7 +122,7 @@ pub unsafe extern "C" fn we_host_on_action(package: *const c_char, f: WeActionFn
     let (Some(p), Some(f)) = (unsafe { text(package) }, f) else { return fail(WE_INVALID_ARGUMENT, "we_host_on_action: null") };
     // The caller owns `user` and its thread safety.
     let user = user as usize;
-    widget_engine::host::on_action(p, move |widget, action| {
+    widgine::host::on_action(p, move |widget, action| {
         let (w, a) = (CString::new(widget).unwrap_or_default(), CString::new(action).unwrap_or_default());
         unsafe { f(user as *mut c_void, w.as_ptr(), a.as_ptr()) };
     });
@@ -132,7 +132,7 @@ pub unsafe extern "C" fn we_host_on_action(package: *const c_char, f: WeActionFn
 /// Protocol version of the running Calmdesk from its last answer; 0: none heard yet.
 #[unsafe(no_mangle)]
 pub extern "C" fn we_host_version() -> c_int {
-    widget_engine::host::host_version() as c_int
+    widgine::host::host_version() as c_int
 }
 
 /// Receives the card's new top-left corner (screen pixels) after the user moved a widget.
@@ -200,5 +200,5 @@ pub unsafe extern "C" fn we_start(engine: *mut WeEngine) -> c_int {
 /// Closes all widgets started with `we_start`.
 #[unsafe(no_mangle)]
 pub extern "C" fn we_stop() {
-    widget_engine::stop();
+    widgine::stop();
 }

@@ -4,10 +4,10 @@
 //! Usage: widget-dev <package-dir>
 //!        widget-dev new <package-dir>   (a new package to start from)
 //!        widget-dev --schema > schemas/layout.xsd
-//! Example: cargo run -p widget-engine --bin widget-dev --release -- widgets/clock
+//! Example: cargo run -p widgine --bin widget-dev --release -- widgets/clock
 
-use widget_engine::Engine;
-use widget_engine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
+use widgine::Engine;
+use widgine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
 
 fn main() {
     let Some(dir) = std::env::args().nth(1) else {
@@ -17,7 +17,7 @@ fn main() {
         std::process::exit(2);
     };
     if dir == "--schema" {
-        print!("{}", widget_engine::layout_schema());
+        print!("{}", widgine::layout_schema());
         return;
     }
     if dir == "new" {

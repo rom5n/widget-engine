@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/widget-engine/widget-engine/schemas/widget.schema.json",
+  "$id": "https://github.com/rom5n/widgine/schemas/widget.schema.json",
   "title": "widget.toml",
   "description": "Manifest of a widget package. Editors with TOML schema support (Even Better TOML / Taplo) pick it up from a `#:schema` comment on the first line.",
   "type": "object",

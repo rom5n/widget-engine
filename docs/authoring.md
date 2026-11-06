@@ -13,7 +13,7 @@ Start one with `widget-dev new widgets/hello` (a clock to change), then preview 
 live reload while you edit:
 
 ```bash
-cargo run -p widget-engine --bin widget-dev --release -- widgets/hello
+cargo run -p widgine --bin widget-dev --release -- widgets/hello
 ```
 
 Errors print with the file and line. The last good version stays on screen.
@@ -95,18 +95,19 @@ Calmdesk lists every package it finds. Install yours to one of these places:
 - `%LOCALAPPDATA%\Widgets\<package>` (per user) or `%ProgramData%\Widgets\<package>`
   (all users).
 - Anywhere, registered as a string value (any name, the package folder as data) under
-  `HKCU\Software\WidgetEngine\Packages` or `HKLM\Software\WidgetEngine\Packages`.
+  `HKCU\Software\Widgine\Packages` or `HKLM\Software\Widgine\Packages`
+  (the older `Software\WidgetEngine\Packages` still works).
 - Inside your app's folder in Program Files, `%LOCALAPPDATA%\Programs` or `%APPDATA%`:
   the manager looks a few folders deep for `widget.toml` next to `layout.xml`.
 
 A registered path may use variables such as `%LOCALAPPDATA%`. The gallery shows the app's
 folder name as the source.
 
-Calmdesk shows the widget in its own process, so `widget_engine::set` in your app does not
-reach it. Feed it with `widget_engine::host` instead, from any thread, while your app runs:
+Calmdesk shows the widget in its own process, so `widgine::set` in your app does not
+reach it. Feed it with `widgine::host` instead, from any thread, while your app runs:
 
 ```rust
-use widget_engine::host;
+use widgine::host;
 
 host::set("com.example.weather", "temp", "21°"); // {app.temp} in every widget of the package
 host::on_action("com.example.weather", |widget, action| println!("{widget}: {action}"));

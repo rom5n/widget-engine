@@ -11,15 +11,15 @@ You need Windows 11, Rust 1.85 or newer, and the MSVC build tools (the "Desktop 
 with C++" workload of Visual Studio Build Tools).
 
 ```bash
-git clone https://github.com/rom5n/widget-engine.git widget-engine
+git clone https://github.com/rom5n/widgine.git widgine
 ```
 
 ```bash
-cd widget-engine
+cd widgine
 ```
 
 ```bash
-cargo run -p widget-engine --example clock --release
+cargo run -p widgine --example clock --release
 ```
 
 A clock appears in the top right corner. Right-click it to see the settings menu users get,
@@ -31,7 +31,7 @@ A widget is a folder with a manifest and a layout. `widget-dev new` writes a sma
 start from:
 
 ```bash
-cargo run -p widget-engine --bin widget-dev --release -- new widgets/weather
+cargo run -p widgine --bin widget-dev --release -- new widgets/weather
 ```
 
 ```
@@ -62,7 +62,7 @@ allow = ["size", "background", "theme", "font", "shape", "colors"]
 ## 3. Preview with live reload
 
 ```bash
-cargo run -p widget-engine --bin widget-dev --release -- widgets/weather
+cargo run -p widgine --bin widget-dev --release -- widgets/weather
 ```
 
 Keep it running. Every save of `widget.toml`, `layout.xml` or an asset redraws the widget.
@@ -132,15 +132,15 @@ English text. The engine picks the Windows display language:
 ## 6. Feed it from your app
 
 Calmdesk shows the widget in its own process. Your app sends values to it with
-`widget_engine::host`; `{app.<key>}` in every widget of the package updates:
+`widgine::host`; `{app.<key>}` in every widget of the package updates:
 
 ```toml
 [dependencies]
-widget-engine = { git = "https://github.com/rom5n/widget-engine.git" }
+widgine = "0.1"
 ```
 
 ```rust
-use widget_engine::host;
+use widgine::host;
 
 const PACKAGE: &str = "com.yourname.weather";
 
@@ -191,7 +191,7 @@ Check before you ship:
 Put the package where Calmdesk looks for it, from your app's installer:
 
 - `%LOCALAPPDATA%\Widgets\<package>` for one user, `%ProgramData%\Widgets\<package>` for all.
-- Or anywhere, registered as a string value under `HKCU\Software\WidgetEngine\Packages`
+- Or anywhere, registered as a string value under `HKCU\Software\Widgine\Packages`
   (or `HKLM`), with the package folder as data.
 - Or inside your app's own folder in Program Files, `%LOCALAPPDATA%\Programs` or `%APPDATA%`.
 
@@ -204,9 +204,9 @@ next start.
 An app can also show widgets with its own engine, without Calmdesk:
 
 ```rust
-use widget_engine::Engine;
+use widgine::Engine;
 
-fn main() -> widget_engine::windows::core::Result<()> {
+fn main() -> widgine::windows::core::Result<()> {
     let mut engine = Engine::new();
     engine.load("weather", "widgets/weather", 100, 100)?;
     engine.set("weather", "temp", "21°");

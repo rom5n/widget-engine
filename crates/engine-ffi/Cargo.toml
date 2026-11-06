@@ -1,9 +1,9 @@
 [package]
-name = "widget-engine-ffi"
+name = "widgine-ffi"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "C ABI for widget-engine: widget.dll + widget.h"
+description = "C ABI for widgine: widget.dll + widget.h"
 publish = false
 
 [lib]
@@ -11,4 +11,4 @@ name = "widget"
 crate-type = ["cdylib"]
 
 [dependencies]
-widget-engine = { path = "../engine" }
+widgine = { path = "../engine" }

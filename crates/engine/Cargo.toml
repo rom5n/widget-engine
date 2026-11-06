@@ -1,9 +1,18 @@
 [package]
-name = "widget-engine"
+name = "widgine"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "GPU-rendered desktop widget engine for Windows 11"
+description = "Native desktop widgets for Windows 11: two text files, GPU-rendered, idle at 0% CPU"
+repository = "https://github.com/rom5n/widgine"
+homepage = "https://github.com/rom5n/widgine"
+readme = "../../README.md"
+keywords = ["widgets", "desktop", "windows", "direct2d"]
+categories = ["gui"]
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc"]
 
 [dependencies]
 roxmltree = "0.21.2"

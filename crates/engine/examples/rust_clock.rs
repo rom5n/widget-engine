@@ -1,16 +1,16 @@
 //! Clock written directly against the Rust API (Widget trait, layers, D2D drawing).
 //! The reference clock is the package in widgets/clock, see examples/clock.rs.
 //!
-//! Run: cargo run -p widget-engine --example rust_clock --release
+//! Run: cargo run -p widgine --example rust_clock --release
 //! Drag to move. Right-click for settings. Click it and press Esc to quit.
 
-use widget_engine::windows::Win32::Graphics::Direct2D::Common::*;
-use widget_engine::windows::Win32::Graphics::Direct2D::*;
-use widget_engine::windows::Win32::Graphics::DirectWrite::*;
-use widget_engine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
-use widget_engine::windows::core::*;
-use widget_engine::windows_numerics::Vector2;
-use widget_engine::{Allow, Card, Customization, Engine, Event, Font, LayerId, Scene, Widget, rgba, time, toggle};
+use widgine::windows::Win32::Graphics::Direct2D::Common::*;
+use widgine::windows::Win32::Graphics::Direct2D::*;
+use widgine::windows::Win32::Graphics::DirectWrite::*;
+use widgine::windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
+use widgine::windows::core::*;
+use widgine::windows_numerics::Vector2;
+use widgine::{Allow, Card, Customization, Engine, Event, Font, LayerId, Scene, Widget, rgba, time, toggle};
 
 // Layout in DIPs.
 const W: f32 = 340.0;

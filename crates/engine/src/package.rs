@@ -452,7 +452,7 @@ mod tests {
 
     #[test]
     fn schema_file_is_current() {
-        // Regenerate with: cargo run -p widget-engine --bin widget-dev -- --schema > schemas/layout.xsd
+        // Regenerate with: cargo run -p widgine --bin widget-dev -- --schema > schemas/layout.xsd
         let file = include_str!("../../../schemas/layout.xsd").replace("\r\n", "\n");
         assert_eq!(file, layout_schema(), "schemas/layout.xsd is stale");
     }

@@ -1,9 +1,11 @@
-# widget-engine
+# widgine
+
+*Formerly widget-engine.*
 
 **Beautiful, native desktop widgets for Windows 11. Designed in minutes, rendered on the GPU,
 idle at 0% CPU.**
 
-widget-engine is the fastest way to put your app on the user's desktop. Describe a widget in
+widgine is the fastest way to put your app on the user's desktop. Describe a widget in
 two small text files, and the engine does the rest: liquid-glass materials, smooth
 compositor animations, light and dark themes, per-monitor DPI, a polished settings menu and
 desktop behavior that feels like it shipped with Windows.
@@ -34,7 +36,7 @@ How it stays this light:
 - **Memory stays flat.** Most of the footprint is the shared GPU device; every extra widget
   adds only a few megabytes.
 
-## Why widget-engine
+## Why widgine
 
 ### Create a widget in minutes
 
@@ -80,7 +82,8 @@ How it stays this light:
 
 ### Fits any app
 
-- **Rust:** the `widget-engine` crate, three lines to show a widget.
+- **Rust:** the [`widgine`](https://crates.io/crates/widgine) crate on crates.io, three lines
+  to show a widget: `cargo add widgine`.
 - **C and every other language:** `widget.dll` and `widget.h`.
 - **Ship into [Calmdesk](https://github.com/rom5n/calmdesk):** the widget gallery for Windows 11.
   Your app installs a package folder and sends values; Calmdesk shows it next to every other
@@ -98,20 +101,22 @@ and ships into [Calmdesk](https://github.com/rom5n/calmdesk).
 
 Needs Windows 11, Rust 1.85+ and the MSVC build tools.
 
+Only want the previewer? `cargo install widgine` installs `widget-dev`.
+
 ```bash
-git clone https://github.com/rom5n/widget-engine.git widget && cd widget
-cargo run -p widget-engine --example clock --release
+git clone https://github.com/rom5n/widgine.git widget && cd widget
+cargo run -p widgine --example clock --release
 ```
 
 The clock appears in the top right corner of your desktop. Right-click it for settings,
 double-click and hold to move it, press Esc on it to quit. More examples:
 
 ```bash
-cargo run -p widget-engine --example calendar --release
+cargo run -p widgine --example calendar --release
 ```
 
 ```bash
-cargo run -p widget-engine --example sparkline --release
+cargo run -p widgine --example sparkline --release
 ```
 
 ### Your own widget
@@ -119,7 +124,7 @@ cargo run -p widget-engine --example sparkline --release
 1. Copy `examples/widgets/clock` to `widgets/hello` and open it with live reload:
 
    ```bash
-   cargo run -p widget-engine --bin widget-dev --release -- widgets/hello
+   cargo run -p widgine --bin widget-dev --release -- widgets/hello
    ```
 
 2. Edit `widgets/hello/layout.xml` and save. The widget updates on the desktop:
@@ -140,9 +145,9 @@ cargo run -p widget-engine --example sparkline --release
 3. Host it in your app:
 
    ```rust
-   use widget_engine::Engine;
+   use widgine::Engine;
 
-   fn main() -> widget_engine::windows::core::Result<()> {
+   fn main() -> widgine::windows::core::Result<()> {
        let mut engine = Engine::new();
        engine.load("hello", "widgets/hello", 100, 100)?;
        engine.set("hello", "name", "World");
@@ -183,7 +188,7 @@ we_run(engine);
 | `crates/engine-ffi` | C ABI: `widget.dll`, `include/widget.h` |
 | `examples/widgets` | Packages the examples show: clock, calendar, sparkline |
 | `examples/c-demo` | C app hosting two widgets |
-| `examples/host-demo` | Package fed through `widget_engine::host` while [Calmdesk](https://github.com/rom5n/calmdesk) shows it (`host_demo` example) |
+| `examples/host-demo` | Package fed through `widgine::host` while [Calmdesk](https://github.com/rom5n/calmdesk) shows it (`host_demo` example) |
 | `schemas/` | JSON Schema for `widget.toml`, XML Schema for `layout.xml` |
 
 ## Calmdesk

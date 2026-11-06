@@ -7,11 +7,11 @@ and no IPC. Widgets live as long as the app.
 
 ```toml
 [dependencies]
-widget-engine = { path = "crates/engine" }
+widgine = "0.1"
 ```
 
 ```rust
-use widget_engine::Engine;
+use widgine::Engine;
 
 let mut engine = Engine::new();                       // per-monitor DPI aware, COM initialized
 engine.load("weather", "widgets/weather", 100, 100)?; // id, package dir, default x/y (pixels)
@@ -29,7 +29,7 @@ engine.run()?;                                         // message loop until all
 | `Engine::load(id, dir, x, y)` | Adds a package widget. `id` must be stable across runs: it keys the saved position and settings. Fails with a message naming the file and line. |
 | `Engine::add(id, widget, x, y)` | Adds a widget written in Rust (`impl Widget`). |
 | `Engine::set(id, key, value)` | Sets `{app.key}` before start. |
-| `widget_engine::set(id, key, value)` | Same, any time while the engine runs (callbacks included). The widget redraws what changed. |
+| `widgine::set(id, key, value)` | Same, any time while the engine runs (callbacks included). The widget redraws what changed. |
 | `Engine::on_action(f)` | `f(widget, action)` for actions the engine does not handle (`open:`, `toggle:`, `set:` are built in). Also `"delete"` when the user deletes the widget from its menu: stop loading it. |
 | `Engine::on_paint(widget, canvas, f)` | `f(&ID2D1DeviceContext, w, h)` draws a `<canvas>`, in DIPs. Called on rebuilds and when the canvas's attributes change. |
 | `Engine::on_moved(f)` | `f(widget, x, y)` after a move: the card's top-left corner in screen pixels. |
@@ -38,7 +38,7 @@ engine.run()?;                                         // message loop until all
 | `Engine::remember_styles()` | The settings the user picks for a widget become the starting style of the next widget of that package (`open`, `drag_out`). Reset to defaults forgets them. |
 | `Engine::keep_alive()` | For tray apps: `run` returns only on `WM_QUIT`, not when the last widget closes. |
 | `Engine::run()` | Shows the widgets and runs the message loop. Returns when all widgets are closed. |
-| `Engine::start()` / `widget_engine::stop()` | For apps with their own message loop: `start` shows the widgets and returns; your `DispatchMessageW` drives them. |
+| `Engine::start()` / `widgine::stop()` | For apps with their own message loop: `start` shows the widgets and returns; your `DispatchMessageW` drives them. |
 
 While the engine runs (from callbacks too; changes apply right after the callback returns):
 
@@ -61,17 +61,17 @@ While the engine runs (from callbacks too; changes apply right after the callbac
 For full control, implement `Widget` and draw layers yourself:
 
 ```rust
-use widget_engine::{Engine, Event, Scene, Widget};
+use widgine::{Engine, Event, Scene, Widget};
 
 struct Hello;
 
 impl Widget for Hello {
     fn size(&self) -> (f32, f32) { (200.0, 100.0) }
-    fn build(&mut self, scene: &mut Scene) -> widget_engine::windows::core::Result<()> {
+    fn build(&mut self, scene: &mut Scene) -> widgine::windows::core::Result<()> {
         let layer = scene.add_layer(0.0, 0.0, 200.0, 100.0)?;
         scene.draw(layer, |ctx| { /* Direct2D */ Ok(()) })
     }
-    fn on_event(&mut self, event: Event, scene: &mut Scene) -> widget_engine::windows::core::Result<()> {
+    fn on_event(&mut self, event: Event, scene: &mut Scene) -> widgine::windows::core::Result<()> {
         Ok(())
     }
 }
@@ -99,7 +99,7 @@ gallery uses it for its tiles.
 Build `widget.dll`, `widget.dll.lib`:
 
 ```bash
-cargo build --release -p widget-engine-ffi
+cargo build --release -p widgine-ffi
 ```
 
 Include `crates/engine-ffi/include/widget.h` and link `target/release/widget.dll.lib`.
@@ -126,11 +126,11 @@ int main(void) {
 |---|---|
 | `we_engine_new`, `we_engine_free` | `Engine::new`, drop |
 | `we_load` | `Engine::load` |
-| `we_set` | `widget_engine::set` (works before and after start) |
+| `we_set` | `widgine::set` (works before and after start) |
 | `we_on_action`, `we_on_moved` | `Engine::on_action`, `Engine::on_moved` |
 | `we_on_paint` | `Engine::on_paint`; `context` is an `ID2D1DeviceContext*` |
 | `we_hot_reload` | `Engine::hot_reload` |
-| `we_run`, `we_start`, `we_stop` | `Engine::run`, `Engine::start`, `widget_engine::stop` |
+| `we_run`, `we_start`, `we_stop` | `Engine::run`, `Engine::start`, `widgine::stop` |
 | `we_host_set`, `we_host_on_action`, `we_host_version` | `host::set`, `host::on_action`, `host::host_version` (widgets Calmdesk shows) |
 | `we_last_error` | Message of the last failed call on this thread |
 

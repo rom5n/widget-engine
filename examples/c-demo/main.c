@@ -1,7 +1,7 @@
 /* C app hosting two widget packages through widget.dll: the clock, and the sparkline whose
  * Refresh button calls back into this app, which answers by setting {app.peak}.
  *
- * Build (x64 Native Tools prompt, after `cargo build --release -p widget-engine-ffi`):
+ * Build (x64 Native Tools prompt, after `cargo build --release -p widgine-ffi`):
  *   cl /nologo /W4 /I ..\..\crates\engine-ffi\include main.c ..\..\target\release\widget.dll.lib
  * Run from this directory with widget.dll next to main.exe or on PATH.
  */

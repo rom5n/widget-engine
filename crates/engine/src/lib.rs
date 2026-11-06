@@ -5,7 +5,7 @@
 //! Nothing runs between updates: no render loop, no polling.
 //!
 //! ```no_run
-//! use widget_engine::{Engine, Scene, Widget};
+//! use widgine::{Engine, Scene, Widget};
 //! struct Hello;
 //! impl Widget for Hello {
 //!     fn size(&self) -> (f32, f32) { (200.0, 100.0) }

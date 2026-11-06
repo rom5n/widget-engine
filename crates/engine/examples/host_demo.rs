@@ -2,12 +2,12 @@
 //!
 //! 1. Make Calmdesk find the package, e.g. copy examples/host-demo to %LOCALAPPDATA%\Widgets.
 //! 2. Add "Host Demo" from the gallery.
-//! 3. Run: cargo run -p widget-engine --example host_demo --release
+//! 3. Run: cargo run -p widgine --example host_demo --release
 
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
-use widget_engine::host;
+use widgine::host;
 
 const PACKAGE: &str = "com.example.host-demo";
 static COUNT: AtomicU32 = AtomicU32::new(0);

@@ -5,8 +5,8 @@
 //! widgets. These functions do, from any thread of your app:
 //!
 //! ```no_run
-//! widget_engine::host::set("com.example.weather", "temp", "21°");
-//! widget_engine::host::on_action("com.example.weather", |widget, action| println!("{widget}: {action}"));
+//! widgine::host::set("com.example.weather", "temp", "21°");
+//! widgine::host::on_action("com.example.weather", |widget, action| println!("{widget}: {action}"));
 //! ```
 //!
 //! Values are kept and sent again when Calmdesk starts after your app. Actions run on a
