@@ -1,6 +1,6 @@
 [package]
 name = "widgine"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 license.workspace = true
 description = "Native desktop widgets for Windows 11: two text files, GPU-rendered, idle at 0% CPU"
